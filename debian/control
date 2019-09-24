@@ -1,0 +1,12 @@
+Source: ros-kinetic-ainstein-radar-rviz-plugins
+Section: misc
+Priority: extra
+Maintainer: Nick Rotella <nick.rotella@ainstein.ai>
+Build-Depends: debhelper (>= 9.0.0), qtbase5-dev, ros-kinetic-ainstein-radar-msgs, ros-kinetic-catkin, ros-kinetic-rviz
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-kinetic-ainstein-radar-rviz-plugins
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libpcl1.7, libqt5core5a, libqt5gui5, libqt5widgets5, ros-kinetic-ainstein-radar-msgs, ros-kinetic-rviz
+Description: Radar message type plugins for RViz.

@@ -2,6 +2,9 @@
 Changelog for package ainstein_radar_filters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.2 (2019-09-25)
+------------------
+
 1.0.1 (2019-09-24)
 ------------------
 * Refactor filters into separate subpkg, fix bug

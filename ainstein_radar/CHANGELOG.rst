@@ -2,6 +2,11 @@
 Changelog for package ainstein_radar
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.3 (2019-10-03)
+------------------
+* Minor corrections to metapackage package XML
+* Contributors: Nick Rotella
+
 1.0.2 (2019-09-25)
 ------------------
 

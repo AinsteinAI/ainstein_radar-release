@@ -61,6 +61,9 @@ RadarTargetArrayVisual::RadarTargetArrayVisual( Ogre::SceneManager* scene_manage
 
 RadarTargetArrayVisual::~RadarTargetArrayVisual()
 {
+  // Clear the visual:
+  radar_target_visuals_.clear();
+
   // Destroy the frame node since we don't need it anymore.
   scene_manager_->destroySceneNode( frame_node_ );
 }
@@ -68,7 +71,7 @@ RadarTargetArrayVisual::~RadarTargetArrayVisual()
 void RadarTargetArrayVisual::setMessage( const ainstein_radar_msgs::RadarTargetArray::ConstPtr& msg )
 {
   // Resize the target shapes vector:
-  radar_target_visuals_.clear();
+  clearMessage();
   
   // Fill the target shapes from RadarTargetArray message:
   for( const auto& target : msg->targets )

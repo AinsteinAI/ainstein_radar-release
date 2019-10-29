@@ -1,14 +1,16 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>ainstein_radar_drivers</name>
-  <version>1.0.3</version>
-  <description>ROS drivers (interfaces) and nodes for Ainstein radars.</description>
+  <version>1.1.0</version>
+  <description>
+    ROS drivers (interfaces) and nodes for Ainstein radars.
+  </description>
   <maintainer email="nick.rotella@ainstein.ai">Nick Rotella</maintainer>
   <author>Nick Rotella</author>
   <license>BSD</license>
-
-  <url type="website">https://ainstein.ai/</url>
+  <url type="website">https://wiki.ros.org/ainstein_radar_drivers</url>
   <url type="repository">https://github.com/AinsteinAI/ainstein_radar</url>
+  <url type="bugtracker">https://github.com/AinsteinAI/ainstein_radar/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -21,7 +23,7 @@
   
   <export>
     <nodelet plugin="${prefix}/plugins/nodelet_k79.xml" />
-    <nodelet plugin="${prefix}/plugins/nodelet_t79_bsd.xml" />
+    <nodelet plugin="${prefix}/plugins/nodelet_k79_3d.xml" />
   </export>
 
 </package>

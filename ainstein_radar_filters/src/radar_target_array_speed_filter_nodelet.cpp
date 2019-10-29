@@ -26,22 +26,22 @@
 
 #include <nodelet/nodelet.h>
 #include <pluginlib/class_list_macros.h>
-#include "ainstein_radar_drivers/radar_interface_t79_bsd.h"
 
-class NodeletT79BSD : public nodelet::Nodelet
+#include "ainstein_radar_filters/radar_target_array_speed_filter.h"
+
+class NodeletRadarTargetArraySpeedFilter : public nodelet::Nodelet
 {
 public:
-  NodeletT79BSD( void ) {}
-  ~NodeletT79BSD( void ) {}
-
+  NodeletRadarTargetArraySpeedFilter( void ) {}
+  ~NodeletRadarTargetArraySpeedFilter( void ) {}
+  
   virtual void onInit( void )
   {
-    NODELET_DEBUG("Initializing T79 BSD interface nodelet");
-    intf_ptr_.reset( new ainstein_radar_drivers::RadarInterfaceT79BSD( getNodeHandle(), getPrivateNodeHandle() ) );
+    radar_speed_filter_ptr_.reset( new ainstein_radar_filters::RadarTargetArraySpeedFilter( getNodeHandle(), getPrivateNodeHandle() ) );
   }
 
-  private:
-  std::unique_ptr<ainstein_radar_drivers::RadarInterfaceT79BSD> intf_ptr_;
+private:
+  std::unique_ptr<ainstein_radar_filters::RadarTargetArraySpeedFilter> radar_speed_filter_ptr_;
 };
 
-PLUGINLIB_EXPORT_CLASS( NodeletT79BSD, nodelet::Nodelet )
+PLUGINLIB_EXPORT_CLASS( NodeletRadarTargetArraySpeedFilter, nodelet::Nodelet )

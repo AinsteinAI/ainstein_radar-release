@@ -35,20 +35,21 @@ namespace ainstein_radar_filters
     nh_private_( node_handle_private ),
     listen_tf_( buffer_tf_ )
   {
-    pub_cloud_ = nh_private_.advertise<sensor_msgs::PointCloud2>( "cloud", 10 );
+    pub_cloud_ = nh_private_.advertise<sensor_msgs::PointCloud2>( "cloud_out", 10 );
     sub_radar_target_array_ = nh_.subscribe( "radar_in", 10,
 					     &RadarTargetArrayToPointCloud::radarTargetArrayCallback,
 					     this );
+    nh_private_.param( "fixed_frame", fixed_frame_, std::string( "map" ) );  
   }
 
   void RadarTargetArrayToPointCloud::radarTargetArrayCallback( const ainstein_radar_msgs::RadarTargetArray &msg )
   {
     // Get the data frame ID and look up the corresponding tf transform:
     Eigen::Affine3d tf_sensor_to_world;
-    if( buffer_tf_.canTransform( "map", msg.header.frame_id, ros::Time( 0 ) ) )
+    if( buffer_tf_.canTransform( fixed_frame_, msg.header.frame_id, ros::Time( 0 ) ) )
       {
 	tf_sensor_to_world =
-	  tf2::transformToEigen(buffer_tf_.lookupTransform( "map", msg.header.frame_id, ros::Time( 0 ) ) );
+	  tf2::transformToEigen(buffer_tf_.lookupTransform( fixed_frame_, msg.header.frame_id, ros::Time( 0 ) ) );
       }
     else
       {
@@ -77,20 +78,4 @@ namespace ainstein_radar_filters
     pub_cloud_.publish( cloud_msg_ );
   } 
   
-  void RadarTargetArrayToPointCloud::radarTargetToPclPoint( const ainstein_radar_msgs::RadarTarget &target,
-							    PointRadarTarget& pcl_point )
-  {
-    pcl_point.x = cos( ( M_PI / 180.0 ) * target.azimuth ) * cos( ( M_PI / 180.0 ) * target.elevation )
-      * target.range;
-    pcl_point.y = sin( ( M_PI / 180.0 ) * target.azimuth ) * cos( ( M_PI / 180.0 ) * target.elevation )
-      * target.range;
-    pcl_point.z = sin( ( M_PI / 180.0 ) * target.elevation ) * target.range;
-
-    pcl_point.snr = target.snr;
-    pcl_point.range = target.range;
-    pcl_point.speed = target.speed;
-    pcl_point.azimuth = target.azimuth;
-    pcl_point.elevation = target.elevation;
-  }
-
 } // namespace ainstein_radar_filters

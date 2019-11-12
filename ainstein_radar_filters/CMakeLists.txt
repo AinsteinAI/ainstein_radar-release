@@ -12,8 +12,10 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   tf2
   tf2_ros
+  tf2_eigen
   ainstein_radar_msgs
   dynamic_reconfigure
+  jsk_recognition_msgs
 )
 
 # Must be called after catkin_python_setup() and before catkin_package():

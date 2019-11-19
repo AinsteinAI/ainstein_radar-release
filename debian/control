@@ -1,0 +1,12 @@
+Source: ros-kinetic-ainstein-radar-msgs
+Section: misc
+Priority: optional
+Maintainer: Nick Rotella <nick.rotella@ainstein.ai>
+Build-Depends: debhelper (>= 9.0.0), ros-kinetic-catkin, ros-kinetic-message-generation, ros-kinetic-std-msgs
+Homepage: https://wiki.ros.org/ainstein_radar_msgs
+Standards-Version: 3.9.2
+
+Package: ros-kinetic-ainstein-radar-msgs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-kinetic-message-runtime, ros-kinetic-std-msgs
+Description: ROS message definitions for Ainstein radars.

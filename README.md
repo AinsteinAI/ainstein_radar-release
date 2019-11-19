@@ -1,3 +1,33 @@
+## ainstein_radar (kinetic) - 2.0.2-1
+
+The packages in the `ainstein_radar` repository were released into the `kinetic` distro by running `/usr/local/bin/bloom-release --rosdistro kinetic --track kinetic ainstein_radar` on `Tue, 19 Nov 2019 18:25:24 -0000`
+
+These packages were released:
+- `ainstein_radar`
+- `ainstein_radar_drivers`
+- `ainstein_radar_filters`
+- `ainstein_radar_gazebo_plugins`
+- `ainstein_radar_msgs`
+- `ainstein_radar_rviz_plugins`
+- `ainstein_radar_tools`
+
+Version of package(s) in repository `ainstein_radar`:
+
+- upstream repository: https://github.com/AinsteinAI/ainstein_radar.git
+- release repository: https://github.com/AinsteinAI/ainstein_radar-release.git
+- rosdistro version: `2.0.1-1`
+- old version: `2.0.1-1`
+- new version: `2.0.2-1`
+
+Versions of tools used:
+
+- bloom version: `0.9.0`
+- catkin_pkg version: `0.4.14`
+- rosdep version: `0.17.1`
+- rosdistro version: `0.7.5`
+- vcstools version: `0.1.42`
+
+
 ## ainstein_radar (kinetic) - 2.0.1-1
 
 The packages in the `ainstein_radar` repository were released into the `kinetic` distro by running `/usr/local/bin/bloom-release --rosdistro kinetic --track kinetic ainstein_radar` on `Tue, 12 Nov 2019 22:01:05 -0000`

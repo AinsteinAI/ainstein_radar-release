@@ -24,28 +24,24 @@
   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "ainstein_radar_filters/radar_target_array_to_point_cloud.h"
+#include <nodelet/nodelet.h>
+#include <pluginlib/class_list_macros.h>
 
-namespace ainstein_radar_filters
+#include "ainstein_radar_filters/radar_target_array_to_laser_scan.h"
+
+class NodeletRadarTargetArrayToLaserScan : public nodelet::Nodelet
 {
-
-  RadarTargetArrayToPointCloud::RadarTargetArrayToPointCloud( ros::NodeHandle node_handle,
-							      ros::NodeHandle node_handle_private ) :
-    nh_( node_handle ),
-    nh_private_( node_handle_private )
+public:
+  NodeletRadarTargetArrayToLaserScan( void ) {}
+  ~NodeletRadarTargetArrayToLaserScan( void ) {}
+  
+  virtual void onInit( void )
   {
-    sub_radar_data_ = nh_.subscribe( "radar_in", 10,
-				     &RadarTargetArrayToPointCloud::radarDataCallback,
-				     this );
-
-    pub_cloud_ = nh_private_.advertise<sensor_msgs::PointCloud2>( "cloud_out", 10 );
+    radar_to_scan_ptr_.reset( new ainstein_radar_filters::RadarTargetArrayToLaserScan( getNodeHandle(), getPrivateNodeHandle() ) );
   }
 
-  void RadarTargetArrayToPointCloud::radarDataCallback( const ainstein_radar_msgs::RadarTargetArray::ConstPtr &msg )
-  {
-    sensor_msgs::PointCloud2 cloud_msg;
-    data_conversions::radarTargetArrayToROSCloud( *msg, cloud_msg );
-    pub_cloud_.publish( cloud_msg );
-  } 
-  
-}// namespace ainstein_radar_filters
+private:
+  std::unique_ptr<ainstein_radar_filters::RadarTargetArrayToLaserScan> radar_to_scan_ptr_;
+};
+
+PLUGINLIB_EXPORT_CLASS( NodeletRadarTargetArrayToLaserScan, nodelet::Nodelet )

@@ -24,18 +24,17 @@
   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "ainstein_radar_filters/radar_target_array_to_point_cloud.h"
 #include <ros/ros.h>
+#include "ainstein_radar_filters/radar_target_array_to_point_cloud.h"
 
 int main( int argc, char** argv )
 {
   // Initialize ROS node:
-  ros::init( argc, argv, "pcl_point_radar_target_node" );
+  ros::init( argc, argv, "radar_target_array_to_point_cloud_node" );
   ros::NodeHandle node_handle;
   ros::NodeHandle node_handle_private( "~" );
 
-  ainstein_radar_filters::RadarTargetArrayToPointCloud pcl_convert( node_handle,
-								    node_handle_private );
+  ainstein_radar_filters::RadarTargetArrayToPointCloud radar_target_array_to_point_cloud( node_handle, node_handle_private );
   
   ros::spin();
 

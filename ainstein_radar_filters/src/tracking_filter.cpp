@@ -24,33 +24,38 @@
   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "ainstein_radar_filters/radardata_to_tracked_targets.h"
+#include "ainstein_radar_filters/tracking_filter.h"
 
 namespace ainstein_radar_filters
 {
-  const int RadarDataToTrackedTargets::max_tracked_targets = 100;
+  const int TrackingFilter::max_tracked_targets = 100;
 
-  void RadarDataToTrackedTargets::initialize( void )
+  void TrackingFilter::initialize( void )
   {
     // Set up raw radar data subscriber and tracked radar data publisher:
     sub_radar_data_raw_ = nh_.subscribe( "radar_in", 1,
-					 &RadarDataToTrackedTargets::radarDataCallback,
+					 &TrackingFilter::radarTargetArrayCallback,
 					 this );
+
+    sub_point_cloud_raw_ = nh_.subscribe( "cloud_in", 1,
+					  &TrackingFilter::pointCloudCallback,
+					  this );
+    
 
     pub_radar_data_tracked_ = nh_private_.advertise<ainstein_radar_msgs::RadarTargetArray>( "tracked", 1 );
     
     pub_bounding_boxes_ = nh_private_.advertise<jsk_recognition_msgs::BoundingBoxArray>( "boxes", 1 );
     
     // Reserve space for the maximum number of target Kalman Filters:
-    filters_.reserve( RadarDataToTrackedTargets::max_tracked_targets );
+    filters_.reserve( TrackingFilter::max_tracked_targets );
 
     // Launch the periodic filter update thread:
-    filter_update_thread_ = std::unique_ptr<std::thread>( new std::thread( &RadarDataToTrackedTargets::updateFiltersLoop,
+    filter_update_thread_ = std::unique_ptr<std::thread>( new std::thread( &TrackingFilter::updateFiltersLoop,
 									   this,
 									   filter_update_rate_ ) );									  
   }
   
-  void RadarDataToTrackedTargets::updateFiltersLoop( double frequency )
+  void TrackingFilter::updateFiltersLoop( double frequency )
   {
     // Set the periodic task rate:
     ros::Rate update_filters_rate( frequency );
@@ -76,6 +81,9 @@ namespace ainstein_radar_filters
 	time_now = ros::Time::now();
 
 	dt = ( time_now - time_prev ).toSec();
+	
+	// Block callback from modifying the filters
+	mutex_.lock();
 
 	// Remove filters which have not been updated in specified time:
 	ROS_DEBUG_STREAM( "Number of filters before pruning: " << filters_.size() << std::endl );
@@ -125,6 +133,9 @@ namespace ainstein_radar_filters
 	      }
 	  }
 
+	// Release lock on filter state
+	mutex_.unlock();
+	
 	// Publish the tracked targets:
 	pub_radar_data_tracked_.publish( msg_tracked_targets_ );
 
@@ -141,37 +152,40 @@ namespace ainstein_radar_filters
 	update_filters_rate.sleep(); 
       }
   }
-  
-  void RadarDataToTrackedTargets::radarDataCallback( const ainstein_radar_msgs::RadarTargetArray::Ptr& msg )
+
+  void TrackingFilter::radarTargetArrayCallback( const ainstein_radar_msgs::RadarTargetArray& msg )
   {
     // Store the frame_id for the messages:
-    msg_tracked_targets_.header.frame_id = msg->header.frame_id;
-    msg_tracked_boxes_.header.frame_id = msg->header.frame_id;
+    msg_tracked_targets_.header.frame_id = msg.header.frame_id;
+    msg_tracked_boxes_.header.frame_id = msg.header.frame_id;
     
     // Reset the measurement count vector for keeping track of which measurements get used:
-    meas_count_vec_.resize( msg->targets.size() );
+    meas_count_vec_.resize( msg.targets.size() );
     std::fill( meas_count_vec_.begin(), meas_count_vec_.end(), 0 );
 
+    // Block update loop from modifying the filters
+    mutex_.lock();
+    
     // Resize the targets associated with each filter and set headers:
     filter_targets_.clear();
     filter_targets_.resize( filters_.size() );
     for( auto& targets : filter_targets_ )
       {
 	targets.header.stamp = ros::Time::now();
-	targets.header.frame_id = msg->header.frame_id;
+	targets.header.frame_id = msg.header.frame_id;
       }
     
     // Pass the raw detections to the filters for updating:
     for( int i = 0; i < filters_.size(); ++i )
       {
 	ROS_DEBUG_STREAM( filters_.at( i ) );
-	for( int j = 0; j < msg->targets.size(); ++j )
+	for( int j = 0; j < msg.targets.size(); ++j )
 	  {
 	    // Only use this target if it hasn't already been used by a filter:
 	    if( meas_count_vec_.at( j ) == 0 )
 	      {
 		// Check whether the target should be used as measurement by this filter:
-		ainstein_radar_msgs::RadarTarget t = msg->targets.at( j );
+		ainstein_radar_msgs::RadarTarget t = msg.targets.at( j );
 		Eigen::Vector4d z = filters_.at( i ).computePredMeas( filters_.at( i ).getState() );
 		Eigen::Vector4d y = Eigen::Vector4d( t.range, t.speed, t.azimuth, t.elevation );
 	    
@@ -204,22 +218,31 @@ namespace ainstein_radar_filters
     ROS_DEBUG_STREAM( std::endl );
 
     // Iterate through targets and push back new KFs for unused measurements:
+    ainstein_radar_msgs::RadarTargetArray arr;
+    arr.header.stamp = ros::Time::now();
+    arr.header.frame_id = msg.header.frame_id;
     for( int i = 0; i < meas_count_vec_.size(); ++i )
       {
     	if( meas_count_vec_.at( i ) == 0 )
     	  {
-	    ROS_DEBUG_STREAM( "Pushing back: " << msg->targets.at( i ) << std::endl );
-    	    filters_.emplace_back( msg->targets.at( i ), nh_, nh_private_ );
+	    ROS_DEBUG_STREAM( "Pushing back: " << msg.targets.at( i ) << std::endl );
+    	    filters_.emplace_back( msg.targets.at( i ), nh_, nh_private_ );
+
+	    // Make sure to push back an empty array of targets associated with the new filter
+	    filter_targets_.push_back( arr );
     	  }
       }
+
+    // Release lock on filter state
+    mutex_.unlock();
   }
 
-  jsk_recognition_msgs::BoundingBox RadarDataToTrackedTargets::getBoundingBox( const ainstein_radar_msgs::RadarTarget& tracked_target, const ainstein_radar_msgs::RadarTargetArray& targets )
+  jsk_recognition_msgs::BoundingBox TrackingFilter::getBoundingBox( const ainstein_radar_msgs::RadarTarget& tracked_target, const ainstein_radar_msgs::RadarTargetArray& targets )
   {
     // Find the bounding box dimensions:
     Eigen::Vector3d min_point = Eigen::Vector3d( std::numeric_limits<double>::infinity(),
 						 std::numeric_limits<double>::infinity(),
-						     std::numeric_limits<double>::infinity() );
+						 std::numeric_limits<double>::infinity() );
     Eigen::Vector3d max_point = Eigen::Vector3d( -std::numeric_limits<double>::infinity(),
 						 -std::numeric_limits<double>::infinity(),
 						 -std::numeric_limits<double>::infinity() );    

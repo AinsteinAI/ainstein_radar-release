@@ -1,0 +1,12 @@
+Source: ros-melodic-ainstein-radar-rviz-plugins
+Section: misc
+Priority: optional
+Maintainer: Nick Rotella <nick.rotella@ainstein.ai>
+Build-Depends: debhelper (>= 9.0.0), qtbase5-dev, ros-melodic-ainstein-radar-msgs, ros-melodic-catkin, ros-melodic-rviz
+Homepage: https://wiki.ros.org/ainstein_radar_rviz_plugins
+Standards-Version: 3.9.2
+
+Package: ros-melodic-ainstein-radar-rviz-plugins
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libpcl-apps1.8, libpcl-common1.8, libpcl-features1.8, libpcl-filters1.8, libpcl-io1.8, libpcl-kdtree1.8, libpcl-keypoints1.8, libpcl-ml1.8, libpcl-octree1.8, libpcl-outofcore1.8, libpcl-people1.8, libpcl-recognition1.8, libpcl-registration1.8, libpcl-sample-consensus1.8, libpcl-search1.8, libpcl-segmentation1.8, libpcl-stereo1.8, libpcl-surface1.8, libpcl-tracking1.8, libpcl-visualization1.8, libqt5core5a, libqt5gui5, libqt5widgets5, ros-melodic-ainstein-radar-msgs, ros-melodic-rviz
+Description: Radar message type plugins for RViz.

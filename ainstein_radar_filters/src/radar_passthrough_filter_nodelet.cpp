@@ -24,25 +24,24 @@
   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "ainstein_radar_filters/radardata_range_filter.h"
+#include <nodelet/nodelet.h>
+#include <pluginlib/class_list_macros.h>
 
-int main( int argc, char** argv )
+#include "ainstein_radar_filters/radar_passthrough_filter.h"
+
+class NodeletRadarPassthroughFilter : public nodelet::Nodelet
 {
-  // Initialize ROS node:
-  ros::init( argc, argv, "radardata_range_filter_node" );
-  ros::NodeHandle node_handle;
-  ros::NodeHandle node_handle_private( "~" );
-    
-  // Usage:
-  if( argc < 1 )
-    {
-      std::cerr << "Usage: rosrun ainstein_radar_filters radardata_range_filter_node" << std::endl;
-      return -1;
-    }
+public:
+  NodeletRadarPassthroughFilter( void ) {}
+  ~NodeletRadarPassthroughFilter( void ) {}
+  
+  virtual void onInit( void )
+  {
+    radar_passthrough_filter_ptr_.reset( new ainstein_radar_filters::RadarPassthroughFilter( getNodeHandle(), getPrivateNodeHandle() ) );
+  }
 
-  ainstein_radar_filters::RadarDataRangeFilter radardata_range_filter( node_handle, node_handle_private );
+private:
+  std::unique_ptr<ainstein_radar_filters::RadarPassthroughFilter> radar_passthrough_filter_ptr_;
+};
 
-  ros::spin();
-
-  return 0;
-}
+PLUGINLIB_EXPORT_CLASS( NodeletRadarPassthroughFilter, nodelet::Nodelet )

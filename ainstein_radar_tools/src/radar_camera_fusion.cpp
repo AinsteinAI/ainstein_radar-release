@@ -25,6 +25,7 @@
 */
 
 #include "ainstein_radar_tools/radar_camera_fusion.h"
+#include <ainstein_radar_filters/data_conversions.h>
 
 namespace ainstein_radar_tools
 {
@@ -84,6 +85,7 @@ namespace ainstein_radar_tools
   nh_( node_handle ),
   nh_private_( node_handle_private ),
   it_( nh_ ),
+  it_private_( nh_private_ ),
   listen_tf_( buffer_tf_ )
   {
     sub_radar_ = nh_.subscribe( "radar_topic", 1, &RadarCameraFusion::radarCallback, this );
@@ -91,7 +93,7 @@ namespace ainstein_radar_tools
     sub_objects_ = nh_.subscribe( "objects_topic", 1, &RadarCameraFusion::objectsCallback, this );
     sub_image_ = it_.subscribeCamera( "camera_topic", 1, &RadarCameraFusion::imageCallback, this );
 
-    pub_image_ = it_.advertise( "/radar_camera_test/image_out", 1 );
+    pub_image_ = it_private_.advertise( "image_out", 1 );
     pub_bounding_boxes_ = nh_private_.advertise<jsk_recognition_msgs::BoundingBoxArray>( "boxes", 1 );
 
     has_radar_boxes_ = false;
@@ -119,7 +121,10 @@ namespace ainstein_radar_tools
     radar_boxes_msg_ = bboxes;
 
     // Enables optional processing when boxes are available
-    has_radar_boxes_ = true;
+    if( radar_boxes_msg_.boxes.size() > 0 )
+      {
+	has_radar_boxes_ = true;
+      }
   }
   
   void RadarCameraFusion::objectsCallback( const vision_msgs::Detection2DArray& objects )
@@ -179,7 +184,7 @@ namespace ainstein_radar_tools
       {
 	// Convert the radar target to a 3d Cartesian point
 	PointRadarTarget pcl_point;
-	ainstein_radar_filters::RadarTargetArrayToPointCloud::radarTargetToPclPoint( t, pcl_point );
+	ainstein_radar_filters::data_conversions::radarTargetToPclPoint( t, pcl_point );
 	Eigen::Vector3d target_point = Eigen::Vector3d( pcl_point.x, pcl_point.y, pcl_point.z );
 
 	// Transform the 3d point into the camera coordinate frame
@@ -196,6 +201,8 @@ namespace ainstein_radar_tools
 	boxes_msg_.header = radar_boxes_msg_.header;
       }
 	
+    //ROS_INFO_STREAM( "Check projected targets against detected object boxes" );
+    
     // Check projected targets against each detected object bounding box.
     // In the case that multiple 3d points alias to be within the same 2d
     // bounding box (bbox), only use the nearest one. If radar and camera
@@ -227,7 +234,7 @@ namespace ainstein_radar_tools
 		  }
 	      }
 	  }
-	
+
 	// If we have a valid radar-camera association, render it
 	if( std::isfinite( min_range ) && ind_min_range >= 0 )
 	  {

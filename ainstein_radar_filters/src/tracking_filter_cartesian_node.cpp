@@ -24,24 +24,26 @@
   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "ainstein_radar_filters/radardata_to_nearest_target.h"
+#include "ainstein_radar_filters/tracking_filter_cartesian.h"
 
 int main( int argc, char** argv )
 {
   // Initialize ROS node:
-  ros::init( argc, argv, "radardata_to_nearest_target_node" );
+  ros::init( argc, argv, "tracking_filter_cartesian_node" );
   ros::NodeHandle node_handle;
   ros::NodeHandle node_handle_private( "~" );
 
   // Usage:
   if( argc < 1 )
     {
-      std::cerr << "Usage: rosrun ainstein_radar_filters radardata_to_nearest_target_node" << std::endl;
+      std::cerr << "Usage: rosrun ainstein_radar_filters tracking_filter_cartesian_node" << std::endl;
       return -1;
     }
     
-  // Create node to publish nearest target:
-  ainstein_radar_filters::RadarDataToNearestTarget radardata_to_nearest_target( node_handle, node_handle_private );;
+  // Create node to publish tracked targets:
+  ainstein_radar_filters::TrackingFilterCartesian tracking_filter_cartesian( node_handle, node_handle_private );
+  
+  tracking_filter_cartesian.initialize();
 
   ros::spin();
 

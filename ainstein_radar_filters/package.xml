@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>ainstein_radar_filters</name>
-  <version>3.0.0</version>
+  <version>3.0.1</version>
   <description>
     Filtering and data conversion utilities for radar data.
   </description>
@@ -20,6 +20,7 @@
   <depend>nodelet</depend>
   <depend>jsk_recognition_msgs</depend>
   <depend>tf2_eigen</depend>
+  <depend>tf2_sensor_msgs</depend>
 
   <export>
     <nodelet plugin="${prefix}/plugins/nodelet_radar_target_array_to_point_cloud.xml" />
